@@ -1,5 +1,5 @@
 http {
-        limit_req_zone $http_cf_connecting_ip zone=phpapi:16m rate=5r/s;
+        limit_req_zone $http_cf_connecting_ip zone=phpapi:16m rate=8r/s;
         limit_req_status 429;
 
 	include       mime.types;
