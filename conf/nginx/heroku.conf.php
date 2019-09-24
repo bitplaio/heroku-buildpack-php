@@ -27,9 +27,9 @@ http {
 	# Depending on your set-up you set more restrictive trusted proxies:
 	set_real_ip_from 0.0.0.0/0;
 
-	add_header X-debug-enabled "true" always;
-	add_header X-debug-message $http_x_forwarded_for always;
-	add_header X-debug-message-cloudflare $http_cf_connecting_ip always;
+  #	add_header X-debug-enabled "true" always;
+  #	add_header X-debug-message $http_x_forwarded_for always;
+  #	add_header X-debug-message-cloudflare $http_cf_connecting_ip always;
 
 	# define an easy to reference name that can be used in fastgi_pass
 	upstream heroku-fcgi {
@@ -78,8 +78,20 @@ http {
 
 		# default handling of .php
 		location ~ \.php {
-                        limit_req       zone=phpapi  burst=3 nodelay;
-			try_files @heroku-fcgi @heroku-fcgi;
+      # handle all OPTIONS request with immediate end of processing
+               if ($request_method = 'OPTIONS') {
+                   add_header 'Access-Control-Allow-Origin' '*';
+                   add_header 'access-control-expose-headers' 'Content-Disposition';
+                   add_header 'Access-Control-Allow-Methods' 'POST, PUT, GET, DELETE, OPTIONS';
+                   add_header 'Access-Control-Allow-Headers' '*';
+
+                   add_header 'Access-Control-Max-Age' 1728000;
+                   add_header 'Content-Type' 'text/plain; charset=utf-8';
+                   add_header 'Content-Length' 0;
+                   return 204;
+               }
+               limit_req       zone=phpapi  burst=3 nodelay;
+               try_files @heroku-fcgi @heroku-fcgi;
 		}
 	}
 }
